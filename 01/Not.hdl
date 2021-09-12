@@ -13,5 +13,12 @@ CHIP Not {
     OUT out;
 
     PARTS:
-    // Put your code here:
+    Nand(a=in, b=in, out=out);
 }
+
+// NAND
+// x|y|out
+// 0|0|1
+// 0|1|1
+// 1|0|1
+// 1|1|0
