@@ -16,25 +16,7 @@ CHIP Mux4Way16 {
     OUT out[16];
 
     PARTS:
-        // is a valid
-        Or(a=sel[0], b=sel[1], out=selor);
-        Not(in=selor, out=isavalid);
-
-        // is b valid
-        Not(in=sel[1], out=isselonezero);
-        And(a=sel[0], b=isselonezero, out=isbvalid);
-
-        // is c valid
-        Not(in=sel[0], out=isselzerozero);
-        And(a=isselzerozero, b=sel[1], out=iscvalid);
-
-        // is d valid
-        And(a=sel[0], b=sel[1], out=isdvalid);
-
-        Mux16(a=b, b=a, sel=isavalid, out=out1);
-        Mux16(a=out1, b=b, sel=isbvalid, out=out2);
-        Mux16(a=out2, b=c, sel=iscvalid, out=out3);
-        Mux16(a=out3, b=d, sel=isdvalid, out=out);
-
-
+        Mux16(a=a, b=b, sel=sel[0], out=aorb);
+        Mux16(a=c, b=d, sel=sel[0], out=cord);
+        Mux16(a=aorb, b=cord, sel=sel[1], out=out);
 }
