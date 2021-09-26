@@ -10,11 +10,22 @@
  *                            etc.
  *                            {0, 0, 0, 0, 0, 0, 0, in} if sel == 111
  */
-
 CHIP DMux8Way {
     IN in, sel[3];
     OUT a, b, c, d, e, f, g, h;
 
     PARTS:
-    // Put your code here:
+        DMux4Way(in=in, sel=sel[0..1], a=pa, b=pb, c=pc, d=pd);
+        DMux4Way(in=in, sel=sel[0..1], a=pe, b=pf, c=pg, d=ph);
+
+        Mux(a=pa, b=false, sel=sel[2], out=a);
+        Mux(a=pb, b=false, sel=sel[2], out=b);
+        Mux(a=pc, b=false, sel=sel[2], out=c);
+        Mux(a=pd, b=false, sel=sel[2], out=d);
+
+        Mux(a=false, b=pe, sel=sel[2], out=e);
+        Mux(a=false, b=pf, sel=sel[2], out=f);
+        Mux(a=false, b=pg, sel=sel[2], out=g);
+        Mux(a=false, b=ph, sel=sel[2], out=h);
+
 }
