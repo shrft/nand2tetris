@@ -9,4 +9,47 @@
 // This program only needs to handle arguments that satisfy
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
-// Put your code here.
+// sum = 0;
+// for(i=0; i < R1; i++){
+//     sum += R0
+// }
+
+// if R1 - count > 0
+// add R1 to sum
+// else
+//  go to end
+
+    // init
+    // result
+    @R2
+    M=0
+    // counter
+    @count
+    M=0
+
+(LOOP)
+    // go to end if R1 - count == 0
+    @R1
+    D=M
+    @count
+    D=D-M
+    @END
+    D;JEQ
+
+    // add R1 to sum
+    @R0
+    D=M
+    @R2
+    M=D+M
+
+    // increment count
+    @count
+    M=M+1
+
+    // go back
+    @LOOP
+    0;JEQ
+
+(END)
+    @END
+    0;JMP
