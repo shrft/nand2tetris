@@ -27,5 +27,58 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+        // ram
+        // 0 - 16383
+        // 0 - 011111111111111
+
+        // screen
+        // 16384 - 24575
+        // 100000000000000 -  101111111111111
+
+        // keyboard
+        // 24576
+        // 110000000000000
+
+        /** 
+         * 対象メモリの判定 
+         * ram,screen,keyboardのどれのアドレスか判定する
+         */
+
+        /** ramの判定 */
+        Not(in=address[14], out=isram);
+
+        /** screenの判定 */
+        Mux(a=false, b=true, sel=address[14], out=s1);
+        Mux(a=true, b=false, sel=address[13], out=s2);
+        And(a=s1, b=s2, out=isscreen);
+
+        /** keyboardの判定 */
+        // 24576だった場合すべてのbitが1になるように加算する
+        // 0110000000000000 + 1001111111111111
+        Add16(a[15]=false, a[0..14]=address, b[0..12]=true, b[13..14]=false, b[15]=true, out=k1);
+
+        // すべてのbitを反転し、24576だった場合すべてのbitが0になるようにする
+        Not16(in=k1, out[0..7]=k2, out[8..15]=k3);
+
+        // 0以外のbitが一つでもある場合は1
+        // 1 = not keyboard
+        Or8Way(in=k2, out=k4);
+        Or8Way(in=k3, out=k5);
+        Or(a=k4, b=k5, out=k6);
+
+        // 反転し、1 = keyboardにする
+        Not(in=k6, out=iskeyboard);
+
+        /** # 対象メモリの判定終 */
+
+        And(a=isram, b=load, out=loadm);
+        And(a=isscreen, b=load, out=loads);
+        RAM16K(in=in, load=loadm, address=address[0..13], out=outm);
+        Screen(in=in, load=loads, address=address[0..12], out=outs);
+        Keyboard(out=outk);
+
+        Mux16(a=false, b=outk, sel=iskeyboard, out=out1);
+        Mux16(a=out1, b=outs, sel=isscreen, out=out2);
+        Mux16(a=out2, b=outm, sel=isram, out=out);
+
 }
