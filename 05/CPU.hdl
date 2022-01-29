@@ -1,3 +1,9 @@
+
+// chapter 04
+// https://b1391bd6-da3d-477d-8c01-38cdf774495a.filesusr.com/ugd/44046b_d70026d8c1424487a451eaba3e372132.pdf
+// chapter 05
+// https://b1391bd6-da3d-477d-8c01-38cdf774495a.filesusr.com/ugd/44046b_552ed0898d5d491aabafd8a768a87c6f.pdf
+ 
 // This file is part of www.nand2tetris.org
 // and the book "The Elements of Computing Systems"
 // by Nisan and Schocken, MIT Press.
@@ -39,5 +45,129 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+        // check instruction type a or b
+        DMux(in=true, sel=instruction[15], a=isainstruction, b=iscinstruction);
+
+        // if C instruction, send alu output to A register input.
+        // if A instruction, send instruction to A register input.
+        Mux16(a=instruction, b=aluout, sel=iscinstruction, out=aregvalue);
+
+        // if a instruction, load to the input to a register.
+        // if c instruction and the destination is set to A register, load the input to A register. (A=XXX)
+        Or(a=isainstruction, b=instruction[5], out=loada);
+        ARegister(in=aregvalue, load=loada, out=outa);
+
+        // determine which values should be sent to ALU, A register or M INPUT
+        Mux16(a=outa, b=inM, sel=instruction[12], out=aorm);
+
+        // if instruction's destination specify D, load the input to D register
+        DRegister(in=aluout, load=instruction[4], out=outd);
+
+        // compute
+        ALU(x=outd, y=aorm, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=aluout, zr=zrout, ng=ngout);
+
+        // if instruction's destination specify M, set the flag to 1
+        And(a=iscinstruction, b=instruction[3], out=writeM);
+        // output a register value to addressM
+        And16(a=outa, b=true, out[0..14]=addressM);
+
+        // ouput alu output through outM
+        And16(a=aluout, b=true, out=outM);
+
+        /**  check if we should jump */
+
+        // is greater
+        // 00 = is greater
+        DMux4Way(in=true, sel[0] = ngout, sel[1] = zrout,  a=grout, b=any1, c=any2, d=any3);
+
+        // null
+        Mux8Way16(a=false, b=false, c=false, d=false, e=false, f=false, g=false, h=false, sel[2] = grout, sel[1] = zrout, sel[0] =ngout, out=nullout);
+        // JGT
+        Mux8Way16(a=false, b=false, c=false, d=false, e=true, f=false, g=false, h=false, sel[2] = grout, sel[1] = zrout, sel[0] =ngout,  out=jgtout);
+        // JEQ
+        Mux8Way16(a=false, b=false, c=true, d=false, e=false, f=false, g=false, h=false, sel[2] = grout, sel[1] = zrout, sel[0] =ngout,  out=jeqout);
+        // JGE
+        Mux8Way16(a=false, b=false, c=true, d=false, e=true, f=false, g=false, h=false, sel[2] = grout, sel[1] = zrout, sel[0] =ngout,   out=jgeout);
+        // JLT
+        Mux8Way16(a=false, b=true, c=false, d=false, e=false, f=false, g=false, h=false, sel[2] = grout, sel[1] = zrout, sel[0] =ngout,  out=jltout);
+        // JNE
+        Mux8Way16(a=false, b=true, c=false, d=false, e=true, f=false, g=false, h=false, sel[2] = grout, sel[1] = zrout, sel[0] =ngout,   out=jneout);
+        // JLE
+        Mux8Way16(a=false, b=true, c=true, d=false, e=false, f=false, g=false, h=false, sel[2] = grout, sel[1] = zrout, sel[0] =ngout,   out=jleout);
+        // JMP
+        Mux8Way16(a=true, b=true, c=true, d=true, e=true, f=true, g=true, h=true, sel[2] = grout, sel[1] = zrout, sel[0] =ngout,    out=jmpout);
+
+        Mux8Way16(a=nullout, b=jgtout, c=jeqout, d=jgeout, e=jltout, f=jneout, g=jleout, h=jmpout, sel[2]=instruction[2],sel[1]=instruction[1], sel[0]=instruction[0], out[0]=shouldjump);
+        And(a=iscinstruction, b=shouldjump, out=shouldjump2);
+
+        /**  check if we should jump ends here. */
+
+        // program counter
+        Not(in=shouldjump2, out=shouldnotjump);
+        PC(in=outa, load=shouldjump2, inc=shouldnotjump, reset=reset, out[0..14]=pc);
 }
+// command, j1, j2, j3, gr, zr, ng, result , 
+// null   , 0 , 0 , 0 , 0 , 0 , 0 , invalid, a
+// null   , 0 , 0 , 0 , 0 , 0 , 1 , FALSE  , b
+// null   , 0 , 0 , 0 , 0 , 1 , 0 , FALSE  , c
+// null   , 0 , 0 , 0 , 0 , 1 , 1 , invalid, d
+// null   , 0 , 0 , 0 , 1 , 0 , 0 , FALSE  , e
+// null   , 0 , 0 , 0 , 1 , 0 , 1 , invalid, f
+// null   , 0 , 0 , 0 , 1 , 1 , 0 , invalid, g
+// null   , 0 , 0 , 0 , 1 , 1 , 1 , invalid, h
+// JGT    , 0 , 0 , 1 , 0 , 0 , 0 , invalid, a
+// JGT    , 0 , 0 , 1 , 0 , 0 , 1 , FALSE  , b
+// JGT    , 0 , 0 , 1 , 0 , 1 , 0 , FALSE  , c
+// JGT    , 0 , 0 , 1 , 0 , 1 , 1 , invalid, d
+// JGT    , 0 , 0 , 1 , 1 , 0 , 0 , TRUE   , e
+// JGT    , 0 , 0 , 1 , 1 , 0 , 1 , invalid, f
+// JGT    , 0 , 0 , 1 , 1 , 1 , 0 , invalid, g
+// JGT    , 0 , 0 , 1 , 1 , 1 , 1 , invalid, h
+// JEQ    , 0 , 1 , 0 , 0 , 0 , 0 , invalid, a
+// JEQ    , 0 , 1 , 0 , 0 , 0 , 1 , FALSE  , b
+// JEQ    , 0 , 1 , 0 , 0 , 1 , 0 , TRUE   , c
+// JEQ    , 0 , 1 , 0 , 0 , 1 , 1 , invalid, d
+// JEQ    , 0 , 1 , 0 , 1 , 0 , 0 , FALSE  , e
+// JEQ    , 0 , 1 , 0 , 1 , 0 , 1 , invalid, f
+// JEQ    , 0 , 1 , 0 , 1 , 1 , 0 , invalid, g
+// JEQ    , 0 , 1 , 0 , 1 , 1 , 1 , invalid, h
+// JGE    , 0 , 1 , 1 , 0 , 0 , 0 , invalid, a
+// JGE    , 0 , 1 , 1 , 0 , 0 , 1 , FALSE  , b
+// JGE    , 0 , 1 , 1 , 0 , 1 , 0 , TRUE   , c
+// JGE    , 0 , 1 , 1 , 0 , 1 , 1 , invalid, d
+// JGE    , 0 , 1 , 1 , 1 , 0 , 0 , TRUE   , e
+// JGE    , 0 , 1 , 1 , 1 , 0 , 1 , invalid, f
+// JGE    , 0 , 1 , 1 , 1 , 1 , 0 , invalid, g
+// JGE    , 0 , 1 , 1 , 1 , 1 , 1 , invalid, h
+// JLT    , 1 , 0 , 0 , 0 , 0 , 0 , invalid, a
+// JLT    , 1 , 0 , 0 , 0 , 0 , 1 , TRUE   , b
+// JLT    , 1 , 0 , 0 , 0 , 1 , 0 , FALSE  , c
+// JLT    , 1 , 0 , 0 , 0 , 1 , 1 , invalid, d
+// JLT    , 1 , 0 , 0 , 1 , 0 , 0 , FALSE  , e
+// JLT    , 1 , 0 , 0 , 1 , 0 , 1 , invalid, f
+// JLT    , 1 , 0 , 0 , 1 , 1 , 0 , invalid, g
+// JLT    , 1 , 0 , 0 , 1 , 1 , 1 , invalid, h
+// JNE    , 1 , 0 , 1 , 0 , 0 , 0 , invalid, a
+// JNE    , 1 , 0 , 1 , 0 , 0 , 1 , TRUE   , b
+// JNE    , 1 , 0 , 1 , 0 , 1 , 0 , FALSE  , c
+// JNE    , 1 , 0 , 1 , 0 , 1 , 1 , invalid, d
+// JNE    , 1 , 0 , 1 , 1 , 0 , 0 , TRUE   , e
+// JNE    , 1 , 0 , 1 , 1 , 0 , 1 , invalid, f
+// JNE    , 1 , 0 , 1 , 1 , 1 , 0 , invalid, g
+// JNE    , 1 , 0 , 1 , 1 , 1 , 1 , invalid, h
+// JLE    , 1 , 1 , 0 , 0 , 0 , 0 , invalid, a
+// JLE    , 1 , 1 , 0 , 0 , 0 , 1 , TRUE   , b
+// JLE    , 1 , 1 , 0 , 0 , 1 , 0 , TRUE   , c
+// JLE    , 1 , 1 , 0 , 0 , 1 , 1 , invalid, d
+// JLE    , 1 , 1 , 0 , 1 , 0 , 0 , FALSE  , e
+// JLE    , 1 , 1 , 0 , 1 , 0 , 1 , invalid, f
+// JLE    , 1 , 1 , 0 , 1 , 1 , 0 , invalid, g
+// JLE    , 1 , 1 , 0 , 1 , 1 , 1 , invalid, h
+// JMP    , 1 , 1 , 1 , 0 , 0 , 0 , invalid, a
+// JMP    , 1 , 1 , 1 , 0 , 0 , 1 , TRUE   , b
+// JMP    , 1 , 1 , 1 , 0 , 1 , 0 , TRUE   , c
+// JMP    , 1 , 1 , 1 , 0 , 1 , 1 , invalid, d
+// JMP    , 1 , 1 , 1 , 1 , 0 , 0 , TRUE   , e
+// JMP    , 1 , 1 , 1 , 1 , 0 , 1 , invalid, f
+// JMP    , 1 , 1 , 1 , 1 , 1 , 0 , invalid, g
+// JMP    , 1 , 1 , 1 , 1 , 1 , 1 , invalid, h
