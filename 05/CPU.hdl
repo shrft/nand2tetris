@@ -58,10 +58,12 @@ CHIP CPU {
         ARegister(in=aregvalue, load=loada, out=outa);
 
         // determine which values should be sent to ALU, A register or M INPUT
-        Mux16(a=outa, b=inM, sel=instruction[12], out=aorm);
+        And(a=iscinstruction, b=instruction[12], out=selaorm);
+        Mux16(a=outa, b=inM, sel=selaorm, out=aorm);
 
         // if instruction's destination specify D, load the input to D register
-        DRegister(in=aluout, load=instruction[4], out=outd);
+        And(a=iscinstruction, b=instruction[4], out=loadd);
+        DRegister(in=aluout, load=loadd, out=outd);
 
         // compute
         ALU(x=outd, y=aorm, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=aluout, zr=zrout, ng=ngout);
