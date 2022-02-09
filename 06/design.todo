@@ -1,0 +1,20 @@
+https://www.nand2tetris.org/project06
+
+
+Assembler1(nosimbol):
+    _
+
+Assembler2(simbol):
+    _
+
+
+Parser:
+    _
+    ✔ symbolなし @done(22-02-06 14:03)
+Code:
+    _
+SymbolTable:
+    _
+Controller:
+    _
+
