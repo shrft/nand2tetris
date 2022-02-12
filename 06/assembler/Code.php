@@ -2,7 +2,6 @@
 
 class Code{
     function dest($s){
-        if($s==="" || $s===null) return "000";
         if($s==="M") return "001";
         if($s==="D") return "010";
         if($s==="MD") return "011";
@@ -10,6 +9,7 @@ class Code{
         if($s==="AM") return "101";
         if($s==="AD") return "110";
         if($s==="AMD") return "111";
+        return "000";
     }
     function comp($s){
         if($s==="0")  return "0101010";
@@ -31,7 +31,7 @@ class Code{
         if($s==="D&A")   return "0000000";
         if($s==="D|A")   return "0010101";
 
-        if($s==="M")   return   "1110000";
+        if($s=="M")   return   "1110000";
         if($s==="!M")   return  "1110001";
         if($s==="-M")   return  "1110011";
         if($s==="M+1")   return "1110111";
@@ -41,9 +41,9 @@ class Code{
         if($s==="M-D")   return "1000111";
         if($s==="D&M")   return "1000000";
         if($s==="D|M")   return "1010101";
+        return "0000000";
     }
     function jump($s){
-        if($s===null || $s==="") return "000";
         if($s==="JGT") return "001";
         if($s==="JEQ") return "010";
         if($s==="JGE") return "011";
@@ -51,6 +51,7 @@ class Code{
         if($s==="JNE") return "101";
         if($s==="JLE") return "110";
         if($s==="JMP") return "111";
+        return "000";
     }
 }
 

@@ -10,6 +10,9 @@ class Parser
         foreach($rows as $row){
             $row = trim($row);
             if($row !== "" && strpos($row, '//') !== 0){
+                if($this->contains($row, '//')){
+                    $row = trim(explode('//',$row)[0]);
+                }
                 $this->commands[] = $row;
             }
         }
@@ -30,15 +33,23 @@ class Parser
         $this->pos++;
     }
     function commandType(){
-        // TODO: add command type L later;
         if($this->startsWith($this->current(), '@')){
             return "A";
+        }
+        if($this->startsWith($this->current(), '(')){
+            return "L";
         }
         return "C";
     }
     function symbol(){
-        return str_replace('@','',$this->current());
-        // return xxx of @xxx
+        if($this->commandType() == "A"){
+            return str_replace('@','',$this->current());
+        }elseif($this->commandType() == "L"){
+            $s = str_replace('(','',$this->current());
+            $s = str_replace(')','',$s);
+            return $s;
+        }
+        throw Exception("Invalid command type.");
     }
     function dest(){
         if($this->contains($this->current(), "=")){
@@ -53,8 +64,7 @@ class Parser
         $end   = $semiColonPos?:strlen($this->current())+1;
 
         $length = $end - $start;
-        // print_r([$start, $end, $length]);
-        // print_r()
+
         return substr($this->current(), $start, $length);
     }
     function jump(){
