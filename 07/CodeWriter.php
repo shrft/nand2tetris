@@ -271,6 +271,50 @@ class CodeWriter{
     private function pushThat($index){
         $this->pushFrom('that', 4, $index);
     }
+    private function pushPointer($index){
+        // 0: this
+        // 1: that
+        $this->comment("<<Push pointer[$index] to stack");
+
+        if($index == 0){
+            $address = 3;
+        }else{
+            $address = 4;
+        }
+        $this->addCommands([
+            "@$address",
+            "D=M",
+        ]);
+        $this->selectMemorySPPointTo();
+        $this->addCommands([
+            'M=D'
+        ]);
+        $this->incrementSp();
+        $this->comment("Push pointer[$index] to stack>>");
+    }
+    private function popPointer($index){
+        // 0: this
+        // 1: that
+        $this->comment("<<Pop to pointer[$index]");
+
+        if($index == 0){
+            $address = 3;
+        }else{
+            $address = 4;
+        }
+        $this->decrementSp();
+        $this->selectMemorySPPointTo();
+        $this->addCommands([
+            'D=M'
+        ]);
+
+        $this->addCommands([
+            "@$address",
+            "M=D",
+        ]);
+        
+        $this->comment("Pop to pointer[$index]>>");
+    }
     private function pushTemp($index){
         $segmentName = 'temp';
         $this->comment("<<Push $segmentName\[$index] to stack  ");
@@ -441,38 +485,48 @@ class CodeWriter{
         if($command == 'C_PUSH'){
             if($segment == 'constant'){
                 $this->pushConstant($index);
-            }
+            }else
             if($segment == 'local'){
                 $this->pushLocal($index);
-            }
+            }else
             if($segment == 'argument'){
                 $this->pushArgument($index);
-            }
+            }else
             if($segment == 'this'){
                 $this->pushThis($index);
-            }
+            }else
             if($segment == 'that'){
                 $this->pushThat($index);
-            }
+            }else
             if($segment == 'temp'){
                 $this->pushTemp($index);
+            }else
+            if($segment == 'pointer'){
+                $this->pushPointer($index);
+            }else{
+                throw new Exception('undefined segment:' . $segment);
             }
         }
         if($command == 'C_POP'){
             if($segment == 'local'){
                 $this->popLocal($index);
-            }
+            }else
             if($segment == 'argument'){
                 $this->popArgument($index);
-            }
+            }else
             if($segment == 'this'){
                 $this->popThis($index);
-            }
+            }else
             if($segment == 'that'){
                 $this->popThat($index);
-            }
+            }else
             if($segment == 'temp'){
                 $this->popTemp($index);
+            }else
+            if($segment == 'pointer'){
+                $this->popPointer($index);
+            }else{
+                throw new Exception('undefined segment:' . $segment);
             }
         }
     }
