@@ -4,8 +4,8 @@
 require_once('./CodeWriter.php');
 require_once('./Parser.php');
 
-$in  = './MemoryAccess/PointerTest/PointerTest.vm';
-$out = './MemoryAccess/PointerTest/PointerTest.asm';
+$in  = './MemoryAccess/StaticTest/StaticTest.vm';
+$out = './MemoryAccess/StaticTest/StaticTest.asm';
 $p = new Parser($in);
 $w = new CodeWriter($out);
 

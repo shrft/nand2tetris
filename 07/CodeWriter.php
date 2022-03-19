@@ -292,6 +292,30 @@ class CodeWriter{
         $this->incrementSp();
         $this->comment("Push pointer[$index] to stack>>");
     }
+    private function pushStatic($index){
+        $this->comment("<<Push from static[$index]");
+        $this->addCommands([
+            "@PointerTest.$index",
+            'D=M',
+            'A=0',
+            'A=M',
+            'M=D'
+        ]);
+        $this->incrementSp();
+        $this->comment("Push from static[$index]>>");
+    }
+    private function popStatic($index){
+        $this->comment("<<Pop to static[$index]");
+        $this->decrementSp();
+        $this->addCommands([
+            'A=0',
+            'A=M',
+            'D=M',
+            "@PointerTest.$index",
+            'M=D',
+        ]);
+        $this->comment("Pop to static[$index]>>");
+    }
     private function popPointer($index){
         // 0: this
         // 1: that
@@ -503,6 +527,9 @@ class CodeWriter{
             }else
             if($segment == 'pointer'){
                 $this->pushPointer($index);
+            }else
+            if($segment == 'static'){
+                $this->pushStatic($index);
             }else{
                 throw new Exception('undefined segment:' . $segment);
             }
@@ -525,6 +552,9 @@ class CodeWriter{
             }else
             if($segment == 'pointer'){
                 $this->popPointer($index);
+            }else 
+            if($segment == 'static'){
+                $this->popStatic($index);
             }else{
                 throw new Exception('undefined segment:' . $segment);
             }
