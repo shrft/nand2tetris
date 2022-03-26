@@ -45,7 +45,7 @@ class Parser{
         if($this->startsWith($this->current(), 'if-goto')){
             return 'IFGOTO';
         }
-        if($this->startsWith($this->current(), 'if-goto')){
+        if($this->startsWith($this->current(), 'goto')){
             return 'GOTO';
         }
         if(in_array(
@@ -55,7 +55,7 @@ class Parser{
         ){
             return 'C_ARITHMETIC';
         }
-        throw new Exception('undefined command type.');
+        throw new Exception('undefined command type.'. $this->current());
     }
     function arg1(){
         // echo $this->current()."\n";

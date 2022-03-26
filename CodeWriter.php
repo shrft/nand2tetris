@@ -568,7 +568,7 @@ class CodeWriter{
     function writeGoto($label){
         $this->addCommands([
             "@$label",
-            '0;JEQ;'
+            '0;JEQ'
         ]);
     }
     function writeIfGoto($label){

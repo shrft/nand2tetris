@@ -1,11 +1,12 @@
 <?php
+ini_set('memory_limit', '512M'); 
 // https://drive.google.com/file/d/19fe1PeGnggDHymu4LlVY08KmDdhMVRpm/view
 
 require_once(__DIR__ .'/CodeWriter.php');
 require_once(__DIR__.'/Parser.php');
 
-$in  = './projects/08/ProgramFlow/BasicLoop/BasicLoop.vm';
-$out = './projects/08/ProgramFlow/BasicLoop/BasicLoop.asm';
+$in  = './projects/08/ProgramFlow/FibonacciSeries/FibonacciSeries.vm';
+$out = './projects/08/ProgramFlow/FibonacciSeries/FibonacciSeries.asm';
 $p = new Parser($in);
 $w = new CodeWriter($out);
 
