@@ -39,8 +39,23 @@ class Parser{
         if($this->startsWith($this->current(), 'pop')){
             return 'C_POP';
         }
-        // TODO: need to add more types later on.
-        return 'C_ARITHMETIC';
+        if($this->startsWith($this->current(), 'label')){
+            return 'LABEL';
+        }
+        if($this->startsWith($this->current(), 'if-goto')){
+            return 'IFGOTO';
+        }
+        if($this->startsWith($this->current(), 'if-goto')){
+            return 'GOTO';
+        }
+        if(in_array(
+            $this->current(),
+            ['add','sub','neg','eq','gt','lt','and','or','not']
+            )
+        ){
+            return 'C_ARITHMETIC';
+        }
+        throw new Exception('undefined command type.');
     }
     function arg1(){
         // echo $this->current()."\n";

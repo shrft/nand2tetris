@@ -560,6 +560,25 @@ class CodeWriter{
             }
         }
     }
+    function writeLabel($label){
+        $this->addCommands([
+           "($label)" 
+        ]);
+    }
+    function writeGoto($label){
+        $this->addCommands([
+            "@$label",
+            '0;JEQ;'
+        ]);
+    }
+    function writeIfGoto($label){
+        $this->decrementSp();
+        $this->popToD();
+        $this->addCommands([
+            "@$label",
+            'D;JGT',
+        ]);
+    }
     // write to file
     function output(){
         // array_unshift($data, '');
