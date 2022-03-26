@@ -1,2 +1,5 @@
 *.out
 *.hack
+/07/MemoryAccess/BasicTest/BasicTest.asm
+*.asmh
+*.asm
