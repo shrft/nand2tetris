@@ -45,6 +45,15 @@ class Parser{
         if($this->startsWith($this->current(), 'if-goto')){
             return 'IFGOTO';
         }
+        if($this->startsWith($this->current(), 'function')){
+            return 'FUNC';
+        }
+        if($this->startsWith($this->current(), 'return')){
+            return 'RETURN';
+        }
+        if($this->startsWith($this->current(), 'call')){
+            return 'C_CALL';
+        }
         if($this->startsWith($this->current(), 'goto')){
             return 'GOTO';
         }
@@ -59,14 +68,14 @@ class Parser{
     }
     function arg1(){
         // echo $this->current()."\n";
-        if($this->commandType() == 'C_ARITHMETIC'){
+        if($this->commandType() == 'C_ARITHMETIC' || $this->commandType() == 'RETURN'){
             return $this->current();
         }
         return explode(" ",$this->current())[1];
     }
     function arg2(){
         $types = [
-            'C_PUSH','C_POP','C_FUNCTION','C_CALL'
+            'C_PUSH','C_POP','C_FUNCTION','C_CALL','FUNC'
         ];
         if(in_array($this->commandType(),$types)){
             return explode(" ",$this->current())[2];

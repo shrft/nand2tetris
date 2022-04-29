@@ -4,6 +4,8 @@ class CodeWriter{
     private $outFile = '';
     private $commands = [];
     private $hierarchy = 0;
+    private $fileName = '';
+    private $currentFunction = [];
     function __construct($outputFile){
         $this->outFile = $outputFile;
         $this->outFileH = $outputFile . "h";
@@ -125,6 +127,18 @@ class CodeWriter{
     private function getLine(){
         return $this->getCommandCount();
     }
+
+    // private function getNumOfArg(){
+    //     $size = count($this->commands);
+    //     $lastIndex = $size-1;
+    //     for($i=0; $i<$size; $i++){
+    //         $row = $this->commands[$lastIndex-$i];
+    //         if($this->startsWith($row, 'function')){
+    //             return explode(" ",$row)[2];
+    //         }
+    //     }
+    //     throw new Exception('function not found');
+    // }
  
     private function add(){
         $this->comment("<<ADD ");
@@ -578,6 +592,194 @@ class CodeWriter{
             "@$label",
             'D;JGT',
         ]);
+    }
+    function setFileName($name){
+        $this->fileName = $name;
+    }
+    function writeFunction($name, $numOfArgs){
+        // https://drive.google.com/file/d/1lBsaO5XKLkUgrGY6g6vLMsiZo6rWxlYJ/view
+        $this->comment("<<write function $name");
+        // array_push($this->currentFunction, $name);
+        $this->addCommands([
+            "($name)"
+        ]);
+        for($i=0; $i < $numOfArgs; $i++){
+            $this->pushConstant(0);
+        }
+        $this->comment("write function $name>>");
+    }
+    function writeReturn(){
+        $funcName = array_pop($this->currentFunction);
+        $this->comment("<<write return for $funcName");
+
+
+        $this->addCommands([
+            '@LCL',
+            'D=M',
+            '@localBefore',
+            'M=D'
+        ]);
+
+        // save return address
+        $this->addCommands([
+            '@localBefore',
+            'D=M-1',
+            'D=D-1',
+            'D=D-1',
+            'D=D-1',
+            'A=D-1',
+            'D=M',
+            '@returnAddress',
+            'M=D'
+        ]);
+
+        $this->decrementSp();
+        $this->popToD();
+
+        $this->comment('Copies the return value onto argument 0');
+        $this->addCommands([
+            '@ARG',
+            'A=M',
+            'M=D'
+        ]);
+
+        
+
+        $this->comment('Sets SP for the caller');
+        $this->addCommands([
+            '@ARG',
+            'D=M+1',
+            '@SP',
+            'M=D'
+        ]);
+
+        $this->comment('Restores that');
+        $this->addCommands([
+            '@LCL',
+            'A=M-1',
+            'D=M',
+            '@THAT',
+            'M=D'
+        ]);
+
+        $this->comment('restore this.');
+        $this->addCommands([
+            '@LCL',
+            'D=M-1',
+            'A=D-1',
+            'D=M',
+            '@THIS',
+            'M=D'
+        ]);
+        $this->comment('restore local value');
+
+        
+
+        $this->comment('restore arg');
+        $this->addCommands([
+            '@localBefore',
+            'D=M-1',
+            'D=D-1',
+            'A=D-1',
+            'D=M',
+            '@ARG',
+            'M=D'
+        ]);
+
+        $this->comment('restore local');
+        $this->addCommands([
+            '@localBefore',
+            'D=M-1',
+            'D=D-1',
+            'D=D-1',
+            'A=D-1',
+            'D=M',
+            '@LCL',
+            'M=D'
+        ]);
+
+        $this->comment('Jumps to the return address within the caller’s code');
+        $this->addCommands([
+            '@returnAddress',
+            'A=M',
+            '0;JMP'
+        ]);
+
+        $this->comment("write return for $funcName>>");
+        $this->addLineIfRootCommand();
+    }
+    function writeCall($name, $nArgs){
+        $this->comment("<<write call $name");
+
+        $this->comment('push return address');
+        $this->addCommands([
+           "@$name.ret",
+           'D=A',
+        ]);
+        $this->pushDToStack();
+        $this->incrementSp();
+
+        $this->comment('push LCL');
+        $this->addCommands([
+            '@LCL',
+            'D=M'
+        ]);
+        $this->pushDToStack();
+        $this->incrementSp();
+
+        $this->comment('push ARG');
+        $this->addCommands([
+            '@ARG',
+            'D=M',
+        ]);
+        $this->pushDToStack();
+        $this->incrementSp();
+
+        $this->comment('push THIS');
+        $this->addCommands([
+            '@THIS',
+            'D=M'
+        ]);
+        $this->pushDToStack();
+        $this->incrementSp();
+
+        $this->comment('push THAT');
+        $this->addCommands([
+            '@THAT',
+            'D=M'
+        ]);
+        $this->pushDToStack();
+        $this->incrementSp();
+
+        $this->comment('reposition arg');
+        $this->addCommands([
+            '@5',
+            'D=A',
+            "@$nArgs",
+            'D=D+A',
+            '@SP',
+            'D=M-D',
+            '@ARG',
+            'M=D'
+        ]);
+
+        $this->comment('set LCL');
+        $this->addCommands([
+            '@SP',
+            'D=M',
+            '@LCL',
+            'M=D'
+        ]);
+
+        $this->comment('go to function');
+        $this->addCommands([
+           "@$name",
+           '0;JMP'
+        ]);
+        $this->writeLabel("$name.ret");
+
+        $this->comment("write call $name>>");
+        $this->addLineIfRootCommand();
     }
     // write to file
     function output(){
