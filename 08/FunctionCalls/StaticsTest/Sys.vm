@@ -8,10 +8,12 @@
 function Sys.init 0
 push constant 6
 push constant 8
+// this will set 6 to static0, 8 to static1
 call Class1.set 2
 pop temp 0 // Dumps the return value
 push constant 23
 push constant 15
+// this will set 23 to static0, 15 to static1
 call Class2.set 2
 pop temp 0 // Dumps the return value
 call Class1.get 0

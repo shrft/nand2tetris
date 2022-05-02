@@ -6,8 +6,9 @@ require_once(__DIR__ .'/CodeWriter.php');
 require_once(__DIR__.'/Parser.php');
 
 
-function compile($p, $w){
+function compile($p, $w, $className){
    while(true){
+      $w->addBreakPoint();
       if($p->commandType() == 'C_ARITHMETIC'){
          $w->writeArithmetic($p->current());
       }elseif($p->commandType() == 'C_PUSH'){
@@ -39,8 +40,8 @@ function compile($p, $w){
 
 }
 
-$in  = './projects/08/FunctionCalls/FibonacciElement/';
-$out = './projects/08/FunctionCalls/FibonacciElement/FibonacciElement.asm';
+$in  = './projects/08/FunctionCalls/StaticsTest/';
+$out = './projects/08/FunctionCalls/StaticsTest/StaticsTest.asm';
 
 $files = glob("$in*.vm");
 // var_dump($files);exit();
@@ -49,7 +50,9 @@ $w->init();
 
 foreach($files as $f){
    $p = new Parser($f);
-   compile($p, $w);
+   $className = basename($f, '.vm');
+   $w->setFileName($className);
+   compile($p, $w, $className);
 }
 
 $w->output();

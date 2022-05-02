@@ -26,6 +26,11 @@ class CodeWriter{
             '0;JMP'
         ]);
     }
+    public function addBreakPoint(){
+        $this->addCommands([
+            '@24576'
+        ]);
+    }
     private function startsWith($string, $searchWord){
         return strpos($string, $searchWord) === 0;
     }
@@ -325,7 +330,7 @@ class CodeWriter{
     private function pushStatic($index){
         $this->comment("<<Push from static[$index]");
         $this->addCommands([
-            "@PointerTest.$index",
+            "@{$this->fileName}.$index",
             'D=M',
             'A=0',
             'A=M',
@@ -341,7 +346,7 @@ class CodeWriter{
             'A=0',
             'A=M',
             'D=M',
-            "@PointerTest.$index",
+            "@{$this->fileName}.$index",
             'M=D',
         ]);
         $this->comment("Pop to static[$index]>>");
