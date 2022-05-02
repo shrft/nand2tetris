@@ -1,0 +1,51 @@
+✔ init処理 @done(22-04-30 10:41)
+  set SP to 256
+  call sys.init
+✔ if-gotoあるか? @done(22-04-30 10:41)
+✔ 複数のvmファイルを処理できるようにする @done(22-04-30 12:36)
+
+stack:
+  argument
+  return adddress
+  saved lcl
+  saved arg
+  saved this
+  saved that
+  local <= ないためSPとおなじになる
+
+6: Main.fibonacci
+43: argument pushed for fibonacci
+51: start of less than
+78: jump to if true
+80: jump to if false
+82: if true
+173: return from fibonacci
+174: if false
+231: call main.fibonacci
+279: end call main.fibonacci
+386: start of add in main.fibonacci
+397: end of add in main.fibonacci
+451: return from fibonacci after add
+
+0 1 1 2 3
+4:
+  false:
+    2:
+      false:
+        0:
+          true return 0
+        1:
+          true return 1
+    3:
+      false:
+        1:
+          true return 1
+        2:
+          false:
+            0:
+              true return 0
+            1:
+              true return 1
+
+SPの開始時の値を手動で261に変更したら成功した。
+なぜ261なのかは不明

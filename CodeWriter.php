@@ -12,6 +12,20 @@ class CodeWriter{
         file_put_contents($this->outFile,"");
         file_put_contents($this->outFileH,"");
     }
+    public function init(){
+        // set SP to 256
+        $this->addCommands([
+            '@256',
+            'D=A',
+            '@0',
+            'M=D'
+        ]);
+        // call sys.init
+        $this->addCommands([
+            '@Sys.init',
+            '0;JMP'
+        ]);
+    }
     private function startsWith($string, $searchWord){
         return strpos($string, $searchWord) === 0;
     }
@@ -252,7 +266,9 @@ class CodeWriter{
             function(){
                 $this->comment('set to true');
                 $this->selectMemorySPPointTo();
-                $this->addCommands(['M=-1']);
+                $this->addCommands([
+                    'M=1'
+                ]);
             },
             function(){
                 $this->comment(['set to false']);
@@ -580,18 +596,22 @@ class CodeWriter{
         ]);
     }
     function writeGoto($label){
+        $this->comment("<<write Goto for $label");
         $this->addCommands([
             "@$label",
             '0;JEQ'
         ]);
+        $this->comment("write Goto for $label>>");
     }
     function writeIfGoto($label){
+        $this->comment("<<write writeIfGoto for $label");
         $this->decrementSp();
         $this->popToD();
         $this->addCommands([
             "@$label",
             'D;JGT',
         ]);
+        $this->comment("write writeIfGoto for $label>>");
     }
     function setFileName($name){
         $this->fileName = $name;
@@ -609,6 +629,7 @@ class CodeWriter{
         $this->comment("write function $name>>");
     }
     function writeReturn(){
+
         $funcName = array_pop($this->currentFunction);
         $this->comment("<<write return for $funcName");
 
@@ -712,8 +733,9 @@ class CodeWriter{
         $this->comment("<<write call $name");
 
         $this->comment('push return address');
+        $line = $this->getLine();
         $this->addCommands([
-           "@$name.ret",
+           "@$name.ret.$line",
            'D=A',
         ]);
         $this->pushDToStack();
@@ -776,7 +798,8 @@ class CodeWriter{
            "@$name",
            '0;JMP'
         ]);
-        $this->writeLabel("$name.ret");
+
+        $this->writeLabel("$name.ret.$line");
 
         $this->comment("write call $name>>");
         $this->addLineIfRootCommand();
