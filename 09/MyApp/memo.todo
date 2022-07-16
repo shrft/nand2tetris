@@ -1,0 +1,5 @@
+✔ show hello world @done(22-05-05 10:59)
+move object with allow key like mario:
+    ✔ put mario on the world @done(22-05-05 13:25)
+    ✔ move mario to the left @done(22-05-05 13:49)
+    ✔ walk if key pressed @done(22-05-05 14:01)

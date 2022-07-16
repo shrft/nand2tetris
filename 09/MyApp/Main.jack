@@ -1,0 +1,23 @@
+class Main{
+    function void main(){
+        var Mario mario;
+        var char key;
+        do Output.printString("hello");
+
+        let mario = Mario.new();
+        // do mario.setPosition(10,1);
+        // do mario.printPosition();
+        do mario.draw();
+        // do mario.walk();
+
+        while(true){
+            do Sys.wait(5);
+            let key = Keyboard.keyPressed();
+            if (key = 131) { do mario.climbUp(); }   // up arrow
+            if (key = 133) { do mario.climbDown(); }   // down arrow
+            if (key = 130) { do mario.walkToLeft(); }   // left arrow
+            if (key = 132) { do mario.walkToRight(); }   // right arrow
+        }
+        return;
+    }
+}

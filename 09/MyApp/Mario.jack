@@ -1,0 +1,89 @@
+class Mario{
+    // start memory address = row * 32
+    // row starts from zero.
+    field int row;
+    field int column;
+
+    constructor Mario new(){
+        let row = 0;
+        let column = 0;
+        return this;
+    }
+    method int getPositionMemoryAddress(){
+        return row * 32 + column;
+    }
+    method void setPosition(int prow, int pcolumn){
+        let row = prow;
+        let column = pcolumn;
+        return;
+    }
+    method void printPosition(){
+        do Output.printInt(row);
+        do Output.println();
+        do Output.printInt(column);
+        return;
+    }
+    method void draw(){
+
+        // screen: 512rows, 256pixels each.
+        // 8 bit computers
+        // 256/8=32
+        // 8*32=256
+        // つまり1行を表すのに 256/8=32バイト必要
+        // 512*32=16384
+        // 16*32=512
+        // 15*32=480
+        // 400*32=12800
+        // 400*31=12400
+        var int memAddress;
+        let memAddress = 16384 + getPositionMemoryAddress();
+        do Memory.poke(memAddress + 0, 0);
+        do Memory.poke(memAddress + 32, 0);
+        do Memory.poke(memAddress + 64, 448);
+        do Memory.poke(memAddress + 96, 2016);
+        do Memory.poke(memAddress + 128, 1312);
+        do Memory.poke(memAddress + 160, 2320);
+        do Memory.poke(memAddress + 192, 1040);
+        do Memory.poke(memAddress + 224, 13360);
+        do Memory.poke(memAddress + 256, 6208);
+        do Memory.poke(memAddress + 288, 2096);
+        do Memory.poke(memAddress + 320, 17464);
+        do Memory.poke(memAddress + 352, 30792);
+        do Memory.poke(memAddress + 384, 16480);
+        do Memory.poke(memAddress + 416, 31792);
+        do Memory.poke(memAddress + 448, 1016);
+        do Memory.poke(memAddress + 480, 24);
+        return;
+    }
+    method void walkToLeft(){
+        let column = column - 1;
+        do Screen.clearScreen();
+        do draw();
+        return;
+    }
+    method void walkToRight(){
+        let column = column + 1;
+        do Screen.clearScreen();
+        do draw();
+        return;
+    }
+    method void climbUp(){
+        let row = row - 1;
+        do Screen.clearScreen();
+        do draw();
+        return;
+    }
+    method void climbDown(){
+        let row = row + 1;
+        do Screen.clearScreen();
+        do draw();
+        return;
+    }
+
+
+
+    // method void dispose(){
+    //     do Memory.deAlloc(this);
+    //     return;
+    // }
+}
